@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import FileUpload from "@/components/file-upload";
 import { apiRequest } from "@/lib/queryClient";
 
 const roundSchema = z.object({
@@ -27,7 +25,6 @@ const roundSchema = z.object({
 type RoundForm = z.infer<typeof roundSchema>;
 
 export default function SubmitRound() {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,34 +38,7 @@ export default function SubmitRound() {
   });
 
   const submitRoundMutation = useMutation({
-    mutationFn: async (data: RoundForm & { screenshot?: File }) => {
-      const formData = new FormData();
-      
-      // Add form fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (key !== 'screenshot' && value !== undefined && value !== '') {
-          formData.append(key, value.toString());
-        }
-      });
-
-      // Add screenshot if present
-      if (data.screenshot) {
-        formData.append('screenshot', data.screenshot);
-      }
-
-      const response = await fetch('/api/rounds', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit round');
-      }
-
-      return response.json();
-    },
+    mutationFn: (data: RoundForm) => apiRequest('POST', '/api/rounds', data),
     onSuccess: () => {
       toast({
         title: "Round Submitted",
@@ -78,7 +48,6 @@ export default function SubmitRound() {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/performance"] });
       form.reset();
-      setUploadedFile(null);
     },
     onError: (error: Error) => {
       toast({
@@ -90,10 +59,7 @@ export default function SubmitRound() {
   });
 
   const onSubmit = (data: RoundForm) => {
-    submitRoundMutation.mutate({
-      ...data,
-      screenshot: uploadedFile || undefined,
-    });
+    submitRoundMutation.mutate(data);
   };
 
   return (
@@ -102,7 +68,7 @@ export default function SubmitRound() {
         <CardHeader>
           <CardTitle className="text-2xl">Submit Round Data</CardTitle>
           <p className="text-gray-600">
-            Upload your GHIN app screenshot and we'll extract your round data automatically.
+            Enter your round details manually or sync automatically with GHIN API integration.
           </p>
         </CardHeader>
         <CardContent>
@@ -138,27 +104,10 @@ export default function SubmitRound() {
                 />
               </div>
 
-              {/* GHIN Screenshot Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  GHIN App Screenshot
-                </label>
-                <FileUpload
-                  onFileSelect={setUploadedFile}
-                  selectedFile={uploadedFile}
-                  accept="image/*"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Supports JPG, PNG files up to 10MB. We'll automatically extract your scorecard data.
-                </p>
-              </div>
-
-              <Separator />
-
-              {/* Manual Score Entry */}
+              {/* Score Entry */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Manual Entry (Optional)
+                  Round Details
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
