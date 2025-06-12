@@ -10,6 +10,7 @@ export default function Navigation() {
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: Club },
+    { path: "/onboarding", label: "Connect GHIN", icon: Settings },
     { path: "/submit-round", label: "Submit Round", icon: Upload },
     { path: "/practice-plan", label: "Practice Plan", icon: Calendar },
     { path: "/resources", label: "Resources", icon: Settings },
@@ -24,7 +25,7 @@ export default function Navigation() {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <Club className="text-primary text-2xl mr-3 h-8 w-8" />
-                <h1 className="text-xl font-semibold text-gray-900">GolfPro Practice Planner</h1>
+                <h1 className="text-xl font-semibold text-gray-900">Mid2Low</h1>
               </div>
             </div>
             <div className="flex items-center space-x-4">

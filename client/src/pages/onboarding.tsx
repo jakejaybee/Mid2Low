@@ -31,7 +31,7 @@ export default function Onboarding() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Welcome to GolfPro Practice Planner
+          Welcome to Mid2Low
         </h1>
         <p className="text-lg text-gray-600">
           Let's get you set up with personalized golf improvement tracking

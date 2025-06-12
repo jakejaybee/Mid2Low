@@ -49,8 +49,10 @@ export class GhinApiClient {
 
   // Step 1: Get authorization URL for OAuth flow
   getAuthorizationUrl(redirectUri: string, state?: string): string {
+    // For development, return a mock URL since GHIN credentials aren't configured
+    // In production, you would use real GHIN API credentials
     if (!GHIN_CLIENT_ID) {
-      throw new Error("GHIN_CLIENT_ID not configured");
+      return `https://demo-ghin.example.com/oauth/authorize?response_type=code&client_id=demo&redirect_uri=${encodeURIComponent(redirectUri)}&scope=profile%20scores&state=${state || 'demo'}`;
     }
 
     const params = new URLSearchParams({
