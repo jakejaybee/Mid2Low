@@ -148,40 +148,6 @@ export default function GhinOnboarding() {
               </AlertDescription>
             </Alert>
 
-            {/* Connection Steps */}
-            <div>
-              <h4 className="font-medium text-gray-900 mb-3">How it works:</h4>
-              <div className="space-y-3">
-                <div className="flex items-start">
-                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs mr-3 mt-0.5">
-                    1
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Connect to GHIN</p>
-                    <p className="text-sm text-gray-600">Securely link your existing GHIN account</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs mr-3 mt-0.5">
-                    2
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Import Your History</p>
-                    <p className="text-sm text-gray-600">We'll import your recent rounds and current handicap</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs mr-3 mt-0.5">
-                    3
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Get Personalized Plans</p>
-                    <p className="text-sm text-gray-600">Receive AI-powered practice recommendations based on your actual performance</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <Separator />
 
             {/* Connect Button */}
