@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertRoundSchema, insertResourceSchema, insertPracticePlanSchema } from "@shared/schema";
 import { generatePracticePlan, analyzeScreenshot } from "./openai";
+import { GhinApiClient } from "./ghin-api";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -302,6 +303,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Practice plan generation error:", error);
       res.status(500).json({ message: error.message || "Failed to generate practice plan" });
+    }
+  });
+
+  // GHIN Integration Routes
+  
+  // Get GHIN authorization URL
+  app.get("/api/ghin/auth-url", (req, res) => {
+    try {
+      const redirectUri = `${req.protocol}://${req.get('host')}/api/ghin/callback`;
+      const ghinClient = new GhinApiClient();
+      const authUrl = ghinClient.getAuthorizationUrl(redirectUri, "golf_app_state");
+      
+      res.json({ authUrl });
+    } catch (error) {
+      console.error("GHIN auth URL error:", error);
+      res.status(500).json({ message: "Failed to generate GHIN authorization URL" });
+    }
+  });
+
+  // Handle GHIN OAuth callback
+  app.get("/api/ghin/callback", async (req, res) => {
+    try {
+      const { code, state } = req.query;
+      
+      if (!code) {
+        return res.status(400).json({ message: "Authorization code missing" });
+      }
+
+      const userId = 1; // Hardcoded for demo
+      const redirectUri = `${req.protocol}://${req.get('host')}/api/ghin/callback`;
+      const ghinClient = new GhinApiClient();
+      
+      // Exchange code for tokens
+      const tokens = await ghinClient.exchangeCodeForTokens(code as string, redirectUri);
+      
+      // Get player profile
+      const profile = await ghinClient.getPlayerProfile();
+      
+      // Update user with GHIN connection
+      await storage.updateUserGhinConnection(userId, {
+        ghinNumber: profile.ghin_number,
+        ghinConnected: true,
+        ghinAccessToken: tokens.access_token,
+        ghinRefreshToken: tokens.refresh_token,
+        lastGhinSync: new Date(),
+      });
+
+      // Update handicap if available
+      if (profile.handicap_index !== null) {
+        await storage.updateUserHandicap(userId, profile.handicap_index);
+      }
+
+      // Redirect to success page
+      res.redirect('/?ghin=connected');
+    } catch (error) {
+      console.error("GHIN callback error:", error);
+      res.redirect('/?ghin=error');
+    }
+  });
+
+  // Sync GHIN data
+  app.post("/api/ghin/sync", async (req, res) => {
+    try {
+      const userId = 1; // Hardcoded for demo
+      const user = await storage.getUser(userId);
+      
+      if (!user?.ghinConnected || !user.ghinAccessToken) {
+        return res.status(400).json({ message: "GHIN account not connected" });
+      }
+
+      const ghinClient = new GhinApiClient(user.ghinAccessToken, user.ghinRefreshToken);
+      
+      // Get latest scores
+      const scores = await ghinClient.syncLatestScores(user.lastGhinSync || undefined);
+      
+      // Convert and save rounds
+      const newRounds = [];
+      for (const score of scores) {
+        const roundData = GhinApiClient.convertGhinScoreToRound(score, userId);
+        const round = await storage.createRound(roundData);
+        newRounds.push(round);
+      }
+
+      // Update sync timestamp
+      await storage.updateUserGhinConnection(userId, {
+        lastGhinSync: new Date(),
+      });
+
+      // Get updated handicap
+      const currentHandicap = await ghinClient.getCurrentHandicap();
+      if (currentHandicap !== null) {
+        await storage.updateUserHandicap(userId, currentHandicap);
+      }
+
+      res.json({ 
+        message: "GHIN data synced successfully",
+        newRounds: newRounds.length,
+        handicap: currentHandicap
+      });
+    } catch (error) {
+      console.error("GHIN sync error:", error);
+      res.status(500).json({ message: "Failed to sync GHIN data" });
+    }
+  });
+
+  // Disconnect GHIN account
+  app.post("/api/ghin/disconnect", async (req, res) => {
+    try {
+      const userId = 1; // Hardcoded for demo
+      
+      await storage.updateUserGhinConnection(userId, {
+        ghinConnected: false,
+        ghinAccessToken: null,
+        ghinRefreshToken: null,
+        lastGhinSync: null,
+      });
+
+      res.json({ message: "GHIN account disconnected successfully" });
+    } catch (error) {
+      console.error("GHIN disconnect error:", error);
+      res.status(500).json({ message: "Failed to disconnect GHIN account" });
     }
   });
 

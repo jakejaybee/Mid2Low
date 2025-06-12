@@ -8,6 +8,11 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   name: text("name").notNull(),
   handicap: decimal("handicap", { precision: 4, scale: 1 }),
+  ghinNumber: text("ghin_number"),
+  ghinConnected: boolean("ghin_connected").default(false),
+  ghinAccessToken: text("ghin_access_token"),
+  ghinRefreshToken: text("ghin_refresh_token"),
+  lastGhinSync: timestamp("last_ghin_sync"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -6,6 +6,13 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserHandicap(userId: number, handicap: number): Promise<User>;
+  updateUserGhinConnection(userId: number, ghinData: {
+    ghinNumber?: string;
+    ghinConnected?: boolean;
+    ghinAccessToken?: string;
+    ghinRefreshToken?: string;
+    lastGhinSync?: Date;
+  }): Promise<User>;
 
   // Round operations
   getRounds(userId: number): Promise<Round[]>;
@@ -58,6 +65,11 @@ export class MemStorage implements IStorage {
       password: "password123",
       name: "Mike Johnson",
       handicap: "12.4",
+      ghinNumber: null,
+      ghinConnected: false,
+      ghinAccessToken: null,
+      ghinRefreshToken: null,
+      lastGhinSync: null,
       createdAt: new Date(),
     };
     this.users.set(1, sampleUser);
@@ -206,6 +218,29 @@ export class MemStorage implements IStorage {
       throw new Error("User not found");
     }
     const updatedUser = { ...user, handicap: handicap.toString() };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserGhinConnection(userId: number, ghinData: {
+    ghinNumber?: string;
+    ghinConnected?: boolean;
+    ghinAccessToken?: string;
+    ghinRefreshToken?: string;
+    lastGhinSync?: Date;
+  }): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const updatedUser = { 
+      ...user, 
+      ghinNumber: ghinData.ghinNumber ?? user.ghinNumber,
+      ghinConnected: ghinData.ghinConnected ?? user.ghinConnected,
+      ghinAccessToken: ghinData.ghinAccessToken ?? user.ghinAccessToken,
+      ghinRefreshToken: ghinData.ghinRefreshToken ?? user.ghinRefreshToken,
+      lastGhinSync: ghinData.lastGhinSync ?? user.lastGhinSync,
+    };
     this.users.set(userId, updatedUser);
     return updatedUser;
   }
