@@ -2,31 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertRoundSchema, insertResourceSchema, insertPracticePlanSchema } from "@shared/schema";
-import { generatePracticePlan, analyzeScreenshot } from "./openai";
+import { generatePracticePlan } from "./openai";
 import { GhinApiClient } from "./ghin-api";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-
-// Setup multer for file uploads
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const upload = multer({
-  dest: uploadDir,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'));
-    }
-  },
-});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user (hardcoded to user ID 1 for this demo)
@@ -140,23 +117,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Submit round
-  app.post("/api/rounds", upload.single('screenshot'), async (req, res) => {
+  app.post("/api/rounds", async (req, res) => {
     try {
       const userId = 1; // Hardcoded for demo
-      let roundData = req.body;
-
-      // If screenshot was uploaded, try to analyze it
-      if (req.file) {
-        try {
-          const analysisResult = await analyzeScreenshot(req.file.path);
-          if (analysisResult) {
-            roundData = { ...roundData, ...analysisResult };
-          }
-        } catch (error) {
-          console.error("Screenshot analysis failed:", error);
-          // Continue without analysis if it fails
-        }
-      }
+      const roundData = req.body;
 
       // Validate the round data
       const validatedData = insertRoundSchema.parse({
@@ -170,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         greensInRegulation: roundData.greensInRegulation ? parseInt(roundData.greensInRegulation) : null,
         totalPutts: roundData.totalPutts ? parseInt(roundData.totalPutts) : null,
         penalties: roundData.penalties ? parseInt(roundData.penalties) : null,
-        screenshotUrl: req.file ? `/uploads/${req.file.filename}` : null,
+        screenshotUrl: null,
       });
 
       const round = await storage.createRound(validatedData);
@@ -178,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...round,
         date: round.date.toISOString().split('T')[0],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Round submission error:", error);
       res.status(400).json({ message: error.message || "Failed to submit round" });
     }
@@ -206,7 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const resource = await storage.createResource(validatedData);
       res.json(resource);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create resource" });
     }
   });
@@ -217,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const resource = await storage.updateResource(id, req.body);
       res.json(resource);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update resource" });
     }
   });
@@ -228,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       await storage.deleteResource(id);
       res.json({ message: "Resource deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to delete resource" });
     }
   });
@@ -300,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const practicePlan = await storage.createPracticePlan(validatedData);
       res.json(practicePlan);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Practice plan generation error:", error);
       res.status(500).json({ message: error.message || "Failed to generate practice plan" });
     }
@@ -387,7 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ghinClient = new GhinApiClient(user.ghinAccessToken, user.ghinRefreshToken);
       
       // Get latest scores
-      const scores = await ghinClient.syncLatestScores(user.lastGhinSync || undefined);
+      const scores = await ghinClient.syncLatestScores(user.lastGhinSync ?? undefined);
       
       // Convert and save rounds
       const newRounds = [];
@@ -426,9 +390,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.updateUserGhinConnection(userId, {
         ghinConnected: false,
-        ghinAccessToken: null,
-        ghinRefreshToken: null,
-        lastGhinSync: null,
+        ghinAccessToken: undefined,
+        ghinRefreshToken: undefined,
+        lastGhinSync: undefined,
       });
 
       res.json({ message: "GHIN account disconnected successfully" });
@@ -438,15 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve uploaded files
-  app.use('/uploads', (req, res, next) => {
-    const filePath = path.join(uploadDir, req.path);
-    if (fs.existsSync(filePath)) {
-      res.sendFile(filePath);
-    } else {
-      res.status(404).json({ message: "File not found" });
-    }
-  });
+
 
   const httpServer = createServer(app);
   return httpServer;

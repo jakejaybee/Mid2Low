@@ -115,6 +115,7 @@ Focus on the player's biggest weaknesses while maintaining strengths. Provide sp
   }
 }
 
+// Screenshot analysis removed - using GHIN API integration instead
 export async function analyzeScreenshot(imagePath: string): Promise<any | null> {
   try {
     const imageBuffer = fs.readFileSync(imagePath);
