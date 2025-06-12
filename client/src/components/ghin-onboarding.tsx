@@ -32,14 +32,20 @@ export default function GhinOnboarding() {
     mutationFn: async () => {
       setIsConnecting(true);
       const response = await apiRequest('GET', '/api/ghin/auth-url');
-      window.location.href = response.authUrl;
+      if (response.authUrl) {
+        window.location.href = response.authUrl;
+      }
+      return response;
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       setIsConnecting(false);
+      const isConfigIssue = error.message?.includes('configuration') || error.message?.includes('requires setup');
       toast({
-        title: "Connection Failed",
-        description: error.message,
-        variant: "destructive",
+        title: isConfigIssue ? "GHIN Setup Required" : "Connection Failed",
+        description: isConfigIssue 
+          ? "GHIN API credentials are needed to enable automatic score syncing. You can still use manual score entry in the meantime."
+          : error.message,
+        variant: isConfigIssue ? "default" : "destructive",
       });
     },
   });

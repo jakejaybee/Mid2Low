@@ -311,6 +311,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get GHIN authorization URL
   app.get("/api/ghin/auth-url", (req, res) => {
     try {
+      // Check if GHIN API is properly configured
+      if (!process.env.GHIN_CLIENT_ID || !process.env.GHIN_CLIENT_SECRET) {
+        return res.status(400).json({ 
+          message: "GHIN API integration requires configuration. Please provide your GHIN API credentials to enable automatic score syncing.",
+          requiresSetup: true
+        });
+      }
+
       const redirectUri = `${req.protocol}://${req.get('host')}/api/ghin/callback`;
       const ghinClient = new GhinApiClient();
       const authUrl = ghinClient.getAuthorizationUrl(redirectUri, "golf_app_state");
@@ -318,7 +326,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ authUrl });
     } catch (error) {
       console.error("GHIN auth URL error:", error);
-      res.status(500).json({ message: "Failed to generate GHIN authorization URL" });
+      res.status(500).json({ 
+        message: "Failed to generate GHIN authorization URL",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
