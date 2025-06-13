@@ -63,19 +63,19 @@ export default function SubmitRound() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Submit Round Data</CardTitle>
-          <p className="text-gray-600">
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="text-xl sm:text-2xl">Submit Round Data</CardTitle>
+          <p className="text-sm sm:text-base text-gray-600">
             Enter your round details manually or sync automatically with GHIN API integration.
           </p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
               {/* Basic Round Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <FormField
                   control={form.control}
                   name="date"
@@ -106,11 +106,11 @@ export default function SubmitRound() {
 
               {/* Score Entry */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
                   Round Details
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <FormField
                     control={form.control}
                     name="totalScore"
@@ -157,10 +157,10 @@ export default function SubmitRound() {
 
               {/* Advanced Stats */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
                   Additional Stats (Optional)
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <FormField
                     control={form.control}
                     name="fairwaysHit"
@@ -219,14 +219,14 @@ export default function SubmitRound() {
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <Button type="button" variant="outline">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200">
+                <Button type="button" variant="outline" className="w-full sm:w-auto">
                   Save as Draft
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={submitRoundMutation.isPending}
-                  className="bg-primary hover:bg-primary/90"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90"
                 >
                   {submitRoundMutation.isPending ? "Submitting..." : "Submit Round"}
                 </Button>
