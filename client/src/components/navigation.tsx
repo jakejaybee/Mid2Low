@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Club, Upload, Calendar, Settings, Trophy, Menu, X } from "lucide-react";
+import { Club, Upload, Calendar, Settings, Trophy, Menu, X, Lock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,9 @@ export default function Navigation() {
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: Club },
-    { path: "/onboarding", label: "Connect GHIN", icon: Settings },
     { path: "/submit-round", label: "Submit Round", icon: Upload },
     { path: "/practice-plan", label: "Practice Plan", icon: Calendar },
-    { path: "/resources", label: "Resources", icon: Settings },
+    { path: "/onboarding", label: "Connect GHIN", icon: Lock, locked: true },
   ];
 
   return (
@@ -69,6 +68,7 @@ export default function Navigation() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
+              const isLocked = item.locked;
               
               return (
                 <Link key={item.path} href={item.path}>
@@ -76,11 +76,12 @@ export default function Navigation() {
                     className={`${
                       isActive
                         ? "border-b-2 border-primary text-primary"
-                        : "border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    } py-4 px-1 text-sm font-medium flex items-center transition-colors whitespace-nowrap`}
+                        : `border-b-2 border-transparent ${isLocked ? 'text-gray-400' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
+                    } py-4 px-1 text-sm font-medium flex items-center transition-colors whitespace-nowrap ${isLocked ? 'cursor-not-allowed' : ''}`}
                   >
                     <Icon className="mr-2 h-4 w-4" />
                     {item.label}
+                    {isLocked && <span className="ml-1">🔒</span>}
                   </button>
                 </Link>
               );
@@ -96,6 +97,7 @@ export default function Navigation() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
+              const isLocked = item.locked;
               
               return (
                 <Link key={item.path} href={item.path}>
@@ -104,11 +106,12 @@ export default function Navigation() {
                     className={`${
                       isActive
                         ? "bg-primary/10 text-primary border-l-4 border-primary"
-                        : "text-gray-600 hover:bg-gray-50 border-l-4 border-transparent"
-                    } w-full text-left py-3 px-4 text-base font-medium flex items-center transition-colors`}
+                        : `${isLocked ? 'text-gray-400' : 'text-gray-600 hover:bg-gray-50'} border-l-4 border-transparent`
+                    } w-full text-left py-3 px-4 text-base font-medium flex items-center transition-colors ${isLocked ? 'cursor-not-allowed' : ''}`}
                   >
                     <Icon className="mr-3 h-5 w-5" />
                     {item.label}
+                    {isLocked && <span className="ml-auto">🔒</span>}
                   </button>
                 </Link>
               );
@@ -119,10 +122,11 @@ export default function Navigation() {
 
       {/* Bottom Navigation for Mobile (iOS App Store Style) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-inset-bottom">
-        <div className="grid grid-cols-5 h-16">
+        <div className="grid grid-cols-4 h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
+            const isLocked = item.locked;
             
             return (
               <Link key={item.path} href={item.path}>
@@ -130,10 +134,13 @@ export default function Navigation() {
                   className={`${
                     isActive
                       ? "text-primary"
-                      : "text-gray-400"
-                  } flex flex-col items-center justify-center h-full px-1 transition-colors`}
+                      : isLocked ? "text-gray-300" : "text-gray-400"
+                  } flex flex-col items-center justify-center h-full px-1 transition-colors ${isLocked ? 'cursor-not-allowed' : ''}`}
                 >
-                  <Icon className="h-5 w-5 mb-1" />
+                  <div className="relative">
+                    <Icon className="h-5 w-5 mb-1" />
+                    {isLocked && <span className="absolute -top-1 -right-1 text-xs">🔒</span>}
+                  </div>
                   <span className="text-xs font-medium truncate max-w-full">
                     {item.label.split(' ')[0]}
                   </span>

@@ -7,7 +7,6 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import SubmitRound from "@/pages/submit-round";
 import PracticePlan from "@/pages/practice-plan";
-import Resources from "@/pages/resources";
 import Onboarding from "@/pages/onboarding";
 import Navigation from "@/components/navigation";
 
@@ -18,7 +17,6 @@ function Router() {
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/submit-round" component={SubmitRound} />
       <Route path="/practice-plan" component={PracticePlan} />
-      <Route path="/resources" component={Resources} />
       <Route component={NotFound} />
     </Switch>
   );

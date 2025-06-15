@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,9 +12,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Wand2, Clock, MapPin, Target, TrendingUp, Calendar } from "lucide-react";
+import { Wand2, Clock, MapPin, Target, TrendingUp, Calendar, Plus, Edit, Trash2, Club, DollarSign } from "lucide-react";
 
 const planGenerationSchema = z.object({
   daysPerWeek: z.coerce.number().min(1).max(7),
@@ -24,10 +27,23 @@ const planGenerationSchema = z.object({
   practiceGoal: z.string(),
 });
 
+const resourceSchema = z.object({
+  type: z.enum(["facility", "equipment"]),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  hours: z.string().optional(),
+  cost: z.string().optional(),
+  available: z.boolean().default(true),
+});
+
 type PlanGenerationForm = z.infer<typeof planGenerationSchema>;
+type ResourceForm = z.infer<typeof resourceSchema>;
 
 export default function PracticePlan() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isResourceDialogOpen, setIsResourceDialogOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -47,6 +63,19 @@ export default function PracticePlan() {
       preferredTime: "afternoon",
       availableResources: ["driving-range", "putting-green"],
       practiceGoal: "handicap-reduction",
+    },
+  });
+
+  const resourceForm = useForm<ResourceForm>({
+    resolver: zodResolver(resourceSchema),
+    defaultValues: {
+      type: "facility",
+      name: "",
+      description: "",
+      location: "",
+      hours: "",
+      cost: "",
+      available: true,
     },
   });
 
@@ -70,6 +99,44 @@ export default function PracticePlan() {
         variant: "destructive",
       });
       setIsGenerating(false);
+    },
+  });
+
+  const createResourceMutation = useMutation({
+    mutationFn: (data: ResourceForm) => apiRequest('POST', '/api/resources', data),
+    onSuccess: () => {
+      toast({
+        title: "Resource Added",
+        description: "Your resource has been added successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/resources"] });
+      setIsResourceDialogOpen(false);
+      resourceForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Add Resource",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteResourceMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/resources/${id}`),
+    onSuccess: () => {
+      toast({
+        title: "Resource Deleted",
+        description: "The resource has been deleted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/resources"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Delete Resource",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
