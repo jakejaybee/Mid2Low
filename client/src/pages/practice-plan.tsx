@@ -159,6 +159,7 @@ export default function PracticePlan() {
   ];
 
   const durationOptions = [
+    { value: "0.5", label: "30 mins" },
     { value: "1", label: "1 hour" },
     { value: "1.5", label: "1.5 hours" },
     { value: "2", label: "2 hours" },
@@ -212,14 +213,14 @@ export default function PracticePlan() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Hours per session</FormLabel>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                           {durationOptions.map((option) => (
                             <Button
                               key={option.value}
                               type="button"
                               variant={field.value?.toString() === option.value ? "default" : "outline"}
                               onClick={() => field.onChange(parseFloat(option.value))}
-                              className={field.value?.toString() === option.value ? "bg-primary text-white" : ""}
+                              className="text-sm"
                             >
                               {option.label}
                             </Button>
@@ -235,26 +236,24 @@ export default function PracticePlan() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Preferred time</FormLabel>
-                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="morning" id="morning" />
-                              <label htmlFor="morning" className="text-sm text-gray-700">
-                                Morning (6AM - 12PM)
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="afternoon" id="afternoon" />
-                              <label htmlFor="afternoon" className="text-sm text-gray-700">
-                                Afternoon (12PM - 6PM)
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="evening" id="evening" />
-                              <label htmlFor="evening" className="text-sm text-gray-700">
-                                Evening (6PM - 10PM)
-                              </label>
-                            </div>
+                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="morning" id="morning" className="w-4 h-4" />
+                            <label htmlFor="morning" className="text-sm text-gray-700 cursor-pointer">
+                              Morning (6AM - 12PM)
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="afternoon" id="afternoon" className="w-4 h-4" />
+                            <label htmlFor="afternoon" className="text-sm text-gray-700 cursor-pointer">
+                              Afternoon (12PM - 6PM)
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="evening" id="evening" className="w-4 h-4" />
+                            <label htmlFor="evening" className="text-sm text-gray-700 cursor-pointer">
+                              Evening (6PM - 10PM)
+                            </label>
                           </div>
                         </RadioGroup>
                       </FormItem>
@@ -305,26 +304,24 @@ export default function PracticePlan() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Practice Goals</FormLabel>
-                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="handicap-reduction" id="handicap-reduction" />
-                              <label htmlFor="handicap-reduction" className="text-sm text-gray-700">
-                                Reduce handicap quickly
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="consistency" id="consistency" />
-                              <label htmlFor="consistency" className="text-sm text-gray-700">
-                                Improve consistency
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="specific-skill" id="specific-skill" />
-                              <label htmlFor="specific-skill" className="text-sm text-gray-700">
-                                Work on specific weaknesses
-                              </label>
-                            </div>
+                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="handicap-reduction" id="handicap-reduction" className="w-4 h-4" />
+                            <label htmlFor="handicap-reduction" className="text-sm text-gray-700 cursor-pointer">
+                              Reduce handicap quickly
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="consistency" id="consistency" className="w-4 h-4" />
+                            <label htmlFor="consistency" className="text-sm text-gray-700 cursor-pointer">
+                              Improve consistency
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="specific-skill" id="specific-skill" className="w-4 h-4" />
+                            <label htmlFor="specific-skill" className="text-sm text-gray-700 cursor-pointer">
+                              Work on specific weaknesses
+                            </label>
                           </div>
                         </RadioGroup>
                       </FormItem>

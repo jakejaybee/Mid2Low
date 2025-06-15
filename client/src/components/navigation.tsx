@@ -122,7 +122,7 @@ export default function Navigation() {
 
       {/* Bottom Navigation for Mobile (iOS App Store Style) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-inset-bottom">
-        <div className="grid grid-cols-4 h-16">
+        <div className="flex h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -135,7 +135,7 @@ export default function Navigation() {
                     isActive
                       ? "text-primary"
                       : isLocked ? "text-gray-300" : "text-gray-400"
-                  } flex flex-col items-center justify-center h-full px-1 transition-colors ${isLocked ? 'cursor-not-allowed' : ''}`}
+                  } flex flex-col items-center justify-center h-full flex-1 px-1 transition-colors ${isLocked ? 'cursor-not-allowed' : ''}`}
                 >
                   <div className="relative">
                     <Icon className="h-5 w-5 mb-1" />
