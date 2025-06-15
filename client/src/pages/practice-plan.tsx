@@ -270,7 +270,7 @@ export default function PracticePlan() {
                     name="availableResources"
                     render={({ field }) => (
                       <FormItem>
-                        <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {availableResources.map((resource) => (
                             <div key={resource.id} className="flex items-center space-x-2">
                               <Checkbox
@@ -284,6 +284,7 @@ export default function PracticePlan() {
                                     field.onChange(current.filter((id) => id !== resource.id));
                                   }
                                 }}
+                                className="w-4 h-4 rounded-sm"
                               />
                               <label
                                 htmlFor={resource.id}
