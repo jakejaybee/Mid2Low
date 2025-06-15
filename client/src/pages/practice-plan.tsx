@@ -145,6 +145,10 @@ export default function PracticePlan() {
     generatePlanMutation.mutate(data);
   };
 
+  const onResourceSubmit = (data: ResourceForm) => {
+    createResourceMutation.mutate(data);
+  };
+
   const availableResources = [
     { id: "driving-range", label: "Driving Range" },
     { id: "putting-green", label: "Putting Green" },
@@ -458,6 +462,189 @@ export default function PracticePlan() {
           </CardContent>
         </Card>
       )}
+
+      {/* Resources Management Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+            <div>
+              <CardTitle className="text-xl">Your Practice Resources</CardTitle>
+              <p className="text-gray-600 mt-1">
+                Manage your available facilities and equipment
+              </p>
+            </div>
+            <Dialog open={isResourceDialogOpen} onOpenChange={setIsResourceDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Resource
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Resource</DialogTitle>
+                </DialogHeader>
+                <Form {...resourceForm}>
+                  <form onSubmit={resourceForm.handleSubmit(onResourceSubmit)} className="space-y-4">
+                    <FormField
+                      control={resourceForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="facility">Facility</SelectItem>
+                              <SelectItem value="equipment">Equipment</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={resourceForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Local Driving Range" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={resourceForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Brief description..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={resourceForm.control}
+                        name="location"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Location</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Address or area" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={resourceForm.control}
+                        name="cost"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cost</FormLabel>
+                            <FormControl>
+                              <Input placeholder="$20/hour" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-3">
+                      <Button type="button" variant="outline" onClick={() => setIsResourceDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={createResourceMutation.isPending}>
+                        {createResourceMutation.isPending ? "Adding..." : "Add Resource"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {resources && resources.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {resources.map((resource: any) => (
+                <div key={resource.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className="p-2 rounded-lg bg-primary/10 mr-3">
+                        <Club className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{resource.name}</h4>
+                        <Badge variant={resource.type === 'facility' ? 'default' : 'secondary'} className="mt-1">
+                          {resource.type}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteResourceMutation.mutate(resource.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {resource.description && (
+                    <p className="text-sm text-gray-600 mb-3">{resource.description}</p>
+                  )}
+                  
+                  <div className="space-y-2 text-xs text-gray-500">
+                    {resource.location && (
+                      <div className="flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {resource.location}
+                      </div>
+                    )}
+                    {resource.cost && (
+                      <div className="flex items-center">
+                        <DollarSign className="h-3 w-3 mr-1" />
+                        {resource.cost}
+                      </div>
+                    )}
+                    {resource.hours && (
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {resource.hours}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Club className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No resources yet</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Add your first practice facility or equipment to get started.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
