@@ -1,8 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertRoundSchema, insertResourceSchema, insertPracticePlanSchema } from "@shared/schema";
-import { generatePracticePlan } from "./openai";
+import { insertRoundSchema } from "@shared/schema";
 import { GhinApiClient } from "./ghin-api";
 
 export async function registerRoutes(app: Express): Promise<Server> {

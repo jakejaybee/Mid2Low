@@ -1,4 +1,4 @@
-import { users, rounds, practiceResources, practicePlans, type User, type InsertUser, type Round, type InsertRound, type Resource, type InsertResource, type PracticePlan, type InsertPracticePlan } from "@shared/schema";
+import { users, rounds, type User, type InsertUser, type Round, type InsertRound } from "@shared/schema";
 
 export interface IStorage {
   // User operations
@@ -21,28 +21,14 @@ export interface IStorage {
   updateRound(id: number, updates: Partial<Round>): Promise<Round>;
   getRecentRounds(userId: number, limit: number): Promise<Round[]>;
 
-  // Resource operations
-  getResources(userId: number): Promise<Resource[]>;
-  createResource(resource: InsertResource): Promise<Resource>;
-  updateResource(id: number, updates: Partial<Resource>): Promise<Resource>;
-  deleteResource(id: number): Promise<void>;
 
-  // Practice plan operations
-  getPracticePlans(userId: number): Promise<PracticePlan[]>;
-  getActivePracticePlan(userId: number): Promise<PracticePlan | undefined>;
-  createPracticePlan(plan: InsertPracticePlan): Promise<PracticePlan>;
-  updatePracticePlan(id: number, updates: Partial<PracticePlan>): Promise<PracticePlan>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private rounds: Map<number, Round>;
-  private resources: Map<number, Resource>;
-  private practicePlans: Map<number, PracticePlan>;
   private currentUserId: number;
   private currentRoundId: number;
-  private currentResourceId: number;
-  private currentPlanId: number;
 
   constructor() {
     this.users = new Map();

@@ -14,7 +14,6 @@ export default function Navigation() {
   const navItems = [
     { path: "/", label: "Dashboard", icon: Club },
     { path: "/submit-round", label: "Submit Round", icon: Upload },
-    { path: "/practice-plan", label: "Practice Plan", icon: Calendar },
   ];
 
   return (
