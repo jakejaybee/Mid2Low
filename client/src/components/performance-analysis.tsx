@@ -37,16 +37,16 @@ export default function PerformanceAnalysis({ performance }: PerformanceAnalysis
 
   const performanceAreas = [
     {
-      name: "Driving Accuracy",
-      ...performance.drivingAccuracy,
+      name: "Activity Frequency",
+      ...performance.activityFrequency,
     },
     {
-      name: "Short Game",
-      ...performance.shortGame,
+      name: "Practice Balance",
+      ...performance.practiceBalance,
     },
     {
-      name: "Putting",
-      ...performance.putting,
+      name: "Consistency",
+      ...performance.consistency,
     },
   ];
 

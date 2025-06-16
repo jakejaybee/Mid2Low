@@ -13,29 +13,28 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       title: "Current Handicap",
       value: stats.currentHandicap,
       icon: Club,
-      improvement: stats.handicapImprovement,
-      improvementText: "this month",
+      detail: "Official GHIN",
       color: "primary",
     },
     {
-      title: "Rounds Played",
-      value: stats.roundsPlayed,
+      title: "Total Activities",
+      value: stats.totalActivities || 0,
       icon: Calendar,
-      detail: "Last round: 3 days ago",
+      detail: `${stats.thisWeekActivities || 0} this week`,
       color: "secondary",
     },
     {
-      title: "Practice Hours",
-      value: stats.practiceHours,
+      title: "Total Hours",
+      value: `${stats.totalHours || 0}h`,
       icon: Clock,
-      detail: "This month",
+      detail: "All time tracked",
       color: "accent",
     },
     {
-      title: "Practice Goal",
-      value: stats.goalTarget,
+      title: "On-Course",
+      value: stats.activityBreakdown?.['on-course'] || 0,
       icon: Target,
-      progress: stats.goalProgress,
+      detail: `${stats.activityBreakdown?.['practice-area'] || 0} practice, ${stats.activityBreakdown?.['off-course'] || 0} fitness`,
       color: "warning",
     },
   ];
@@ -59,28 +58,10 @@ export default function StatsCards({ stats }: StatsCardsProps) {
                 </div>
               </div>
               <div className="mt-3 sm:mt-4">
-                {card.improvement && (
-                  <div className="flex items-center text-xs sm:text-sm">
-                    <TrendingDown className="text-success mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="text-success font-medium">{card.improvement}</span>
-                    <span className="text-gray-600 ml-1 truncate">{card.improvementText}</span>
-                  </div>
-                )}
                 {card.detail && (
                   <div className="flex items-center text-xs sm:text-sm">
                     <Calendar className="text-gray-400 mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="text-gray-600 truncate">{card.detail}</span>
-                  </div>
-                )}
-                {card.progress && (
-                  <div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`bg-${card.color} h-2 rounded-full transition-all duration-300`}
-                        style={{ width: `${card.progress}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs sm:text-sm text-gray-600 mt-1 block">{card.progress}% to goal</span>
                   </div>
                 )}
               </div>
