@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Club, Upload, Calendar, Settings, Trophy, Menu, X, Lock } from "lucide-react";
+import { Club, Upload, Calendar, Settings, Trophy, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,6 @@ export default function Navigation() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
-            const isLocked = item.locked;
             
             return (
               <Link key={item.path} href={item.path} className="flex-1">
@@ -129,12 +128,11 @@ export default function Navigation() {
                   className={`${
                     isActive
                       ? "text-primary"
-                      : isLocked ? "text-gray-300" : "text-gray-400"
-                  } flex flex-col items-center justify-center h-full w-full transition-colors ${isLocked ? 'cursor-not-allowed' : ''}`}
+                      : "text-gray-400"
+                  } flex flex-col items-center justify-center h-full w-full transition-colors`}
                 >
                   <div className="relative">
                     <Icon className="h-5 w-5 mb-1" />
-                    {isLocked && <span className="absolute -top-1 -right-1 text-xs">🔒</span>}
                   </div>
                   <span className="text-xs font-medium truncate max-w-full">
                     {item.label.split(' ')[0]}
