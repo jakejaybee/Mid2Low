@@ -91,7 +91,8 @@ The application uses PostgreSQL with the following main tables:
 
 ## Changelog
 
-- June 15, 2025. Initial setup
+- June 15, 2025. Initial setup with full golf improvement platform
+- December 15, 2024. Removed GHIN integration and practice plan functionality to focus on core golf tracking (Strava for golf vision)
 
 ## User Preferences
 

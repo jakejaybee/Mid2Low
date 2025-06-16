@@ -20,8 +20,6 @@ export interface IStorage {
   createRound(round: InsertRound): Promise<Round>;
   updateRound(id: number, updates: Partial<Round>): Promise<Round>;
   getRecentRounds(userId: number, limit: number): Promise<Round[]>;
-
-
 }
 
 export class MemStorage implements IStorage {
@@ -33,12 +31,8 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.rounds = new Map();
-    this.resources = new Map();
-    this.practicePlans = new Map();
     this.currentUserId = 1;
     this.currentRoundId = 1;
-    this.currentResourceId = 1;
-    this.currentPlanId = 1;
 
     // Initialize with sample user
     this.initializeData();
@@ -61,95 +55,38 @@ export class MemStorage implements IStorage {
     this.users.set(1, sampleUser);
     this.currentUserId = 2;
 
-    // Add sample resources
-    const sampleResources: Resource[] = [
-      {
-        id: 1,
-        userId: 1,
-        type: "facility",
-        name: "Driving Range",
-        description: "Westfield Golf Center",
-        location: "5 minutes from home",
-        hours: "6:00 AM - 10:00 PM",
-        cost: "$15/bucket",
-        available: true,
-        createdAt: new Date(),
-      },
-      {
-        id: 2,
-        userId: 1,
-        type: "facility",
-        name: "Putting Green",
-        description: "Large green with various slopes",
-        location: "Westfield Golf Center",
-        hours: "6:00 AM - 10:00 PM",
-        cost: "Free with range usage",
-        available: true,
-        createdAt: new Date(),
-      },
-      {
-        id: 3,
-        userId: 1,
-        type: "equipment",
-        name: "Full Club Set",
-        description: "Titleist T200 Irons, Ping Driver",
-        location: null,
-        hours: null,
-        cost: null,
-        available: true,
-        createdAt: new Date(),
-      },
-      {
-        id: 4,
-        userId: 1,
-        type: "equipment",
-        name: "Alignment Sticks",
-        description: "Practice aids for setup",
-        location: null,
-        hours: null,
-        cost: null,
-        available: true,
-        createdAt: new Date(),
-      },
-    ];
-
-    sampleResources.forEach(resource => {
-      this.resources.set(resource.id, resource);
-    });
-    this.currentResourceId = 5;
-
     // Add sample rounds
     const sampleRounds: Round[] = [
       {
         id: 1,
         userId: 1,
-        date: new Date('2024-12-18'),
-        courseName: "Pebble Beach Golf Links",
-        totalScore: 84,
-        courseRating: "72.1",
-        slopeRating: 131,
-        differential: "12.8",
+        date: new Date('2024-01-15'),
+        courseName: "Westfield Country Club",
+        totalScore: 85,
+        courseRating: "71.2",
+        slopeRating: 125,
+        differential: "12.6",
         fairwaysHit: 8,
-        greensInRegulation: 9,
+        greensInRegulation: 10,
         totalPutts: 32,
         penalties: 2,
         screenshotUrl: null,
-        processed: true,
+        processed: false,
         createdAt: new Date(),
       },
       {
         id: 2,
         userId: 1,
-        date: new Date('2024-12-15'),
-        courseName: "Torrey Pines South",
-        totalScore: 88,
-        courseRating: "74.6",
-        slopeRating: 129,
-        differential: "14.2",
-        fairwaysHit: 6,
-        greensInRegulation: 7,
-        totalPutts: 35,
-        penalties: 3,
+        date: new Date('2024-01-22'),
+        courseName: "Pine Valley Golf Course",
+        totalScore: 82,
+        courseRating: "69.8",
+        slopeRating: 118,
+        differential: "11.7",
+        fairwaysHit: 9,
+        greensInRegulation: 12,
+        totalPutts: 30,
+        penalties: 1,
         screenshotUrl: null,
         processed: false,
         createdAt: new Date(),
@@ -157,20 +94,20 @@ export class MemStorage implements IStorage {
       {
         id: 3,
         userId: 1,
-        date: new Date('2024-12-12'),
-        courseName: "Spyglass Hill",
-        totalScore: 79,
-        courseRating: "71.8",
-        slopeRating: 143,
-        differential: "8.4",
-        fairwaysHit: 10,
-        greensInRegulation: 12,
-        totalPutts: 28,
-        penalties: 1,
+        date: new Date('2024-01-29'),
+        courseName: "Oak Ridge Golf Club",
+        totalScore: 88,
+        courseRating: "72.5",
+        slopeRating: 132,
+        differential: "13.3",
+        fairwaysHit: 6,
+        greensInRegulation: 8,
+        totalPutts: 35,
+        penalties: 3,
         screenshotUrl: null,
-        processed: true,
+        processed: false,
         createdAt: new Date(),
-      },
+      }
     ];
 
     sampleRounds.forEach(round => {
@@ -184,15 +121,26 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date(),
+      id, 
+      ...insertUser,
+      handicap: insertUser.handicap || null,
+      ghinNumber: insertUser.ghinNumber || null,
+      ghinConnected: insertUser.ghinConnected || false,
+      ghinAccessToken: insertUser.ghinAccessToken || null,
+      ghinRefreshToken: insertUser.ghinRefreshToken || null,
+      lastGhinSync: insertUser.lastGhinSync || null,
+      createdAt: new Date()
     };
     this.users.set(id, user);
     return user;
@@ -219,22 +167,16 @@ export class MemStorage implements IStorage {
     if (!user) {
       throw new Error("User not found");
     }
-    const updatedUser = { 
-      ...user, 
-      ghinNumber: ghinData.ghinNumber ?? user.ghinNumber,
-      ghinConnected: ghinData.ghinConnected ?? user.ghinConnected,
-      ghinAccessToken: ghinData.ghinAccessToken ?? user.ghinAccessToken,
-      ghinRefreshToken: ghinData.ghinRefreshToken ?? user.ghinRefreshToken,
-      lastGhinSync: ghinData.lastGhinSync ?? user.lastGhinSync,
-    };
+    const updatedUser = { ...user, ...ghinData };
     this.users.set(userId, updatedUser);
     return updatedUser;
   }
 
   async getRounds(userId: number): Promise<Round[]> {
-    return Array.from(this.rounds.values())
+    const userRounds = Array.from(this.rounds.values())
       .filter(round => round.userId === userId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    return userRounds;
   }
 
   async getRound(id: number): Promise<Round | undefined> {
@@ -244,11 +186,18 @@ export class MemStorage implements IStorage {
   async createRound(insertRound: InsertRound): Promise<Round> {
     const id = this.currentRoundId++;
     const round: Round = {
-      ...insertRound,
       id,
+      ...insertRound,
       differential: this.calculateDifferential(insertRound),
       processed: false,
       createdAt: new Date(),
+      courseRating: insertRound.courseRating || null,
+      slopeRating: insertRound.slopeRating || null,
+      fairwaysHit: insertRound.fairwaysHit || null,
+      greensInRegulation: insertRound.greensInRegulation || null,
+      totalPutts: insertRound.totalPutts || null,
+      penalties: insertRound.penalties || null,
+      screenshotUrl: insertRound.screenshotUrl || null,
     };
     this.rounds.set(id, round);
     return round;
@@ -267,69 +216,6 @@ export class MemStorage implements IStorage {
   async getRecentRounds(userId: number, limit: number): Promise<Round[]> {
     const userRounds = await this.getRounds(userId);
     return userRounds.slice(0, limit);
-  }
-
-  async getResources(userId: number): Promise<Resource[]> {
-    return Array.from(this.resources.values())
-      .filter(resource => resource.userId === userId)
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  async createResource(insertResource: InsertResource): Promise<Resource> {
-    const id = this.currentResourceId++;
-    const resource: Resource = {
-      ...insertResource,
-      id,
-      createdAt: new Date(),
-    };
-    this.resources.set(id, resource);
-    return resource;
-  }
-
-  async updateResource(id: number, updates: Partial<Resource>): Promise<Resource> {
-    const resource = this.resources.get(id);
-    if (!resource) {
-      throw new Error("Resource not found");
-    }
-    const updatedResource = { ...resource, ...updates };
-    this.resources.set(id, updatedResource);
-    return updatedResource;
-  }
-
-  async deleteResource(id: number): Promise<void> {
-    this.resources.delete(id);
-  }
-
-  async getPracticePlans(userId: number): Promise<PracticePlan[]> {
-    return Array.from(this.practicePlans.values())
-      .filter(plan => plan.userId === userId)
-      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
-  }
-
-  async getActivePracticePlan(userId: number): Promise<PracticePlan | undefined> {
-    return Array.from(this.practicePlans.values())
-      .find(plan => plan.userId === userId && plan.active);
-  }
-
-  async createPracticePlan(insertPlan: InsertPracticePlan): Promise<PracticePlan> {
-    const id = this.currentPlanId++;
-    const plan: PracticePlan = {
-      ...insertPlan,
-      id,
-      createdAt: new Date(),
-    };
-    this.practicePlans.set(id, plan);
-    return plan;
-  }
-
-  async updatePracticePlan(id: number, updates: Partial<PracticePlan>): Promise<PracticePlan> {
-    const plan = this.practicePlans.get(id);
-    if (!plan) {
-      throw new Error("Practice plan not found");
-    }
-    const updatedPlan = { ...plan, ...updates };
-    this.practicePlans.set(id, updatedPlan);
-    return updatedPlan;
   }
 
   private calculateDifferential(round: InsertRound): string {
