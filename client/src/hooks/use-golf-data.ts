@@ -12,26 +12,8 @@ export function usePerformanceAnalysis() {
   });
 }
 
-export function useRounds() {
+export function useActivities() {
   return useQuery({
-    queryKey: ["/api/rounds"],
-  });
-}
-
-export function useResources() {
-  return useQuery({
-    queryKey: ["/api/resources"],
-  });
-}
-
-export function usePracticePlans() {
-  return useQuery({
-    queryKey: ["/api/practice-plans"],
-  });
-}
-
-export function useActivePracticePlan() {
-  return useQuery({
-    queryKey: ["/api/practice-plans/active"],
+    queryKey: ["/api/activities"],
   });
 }

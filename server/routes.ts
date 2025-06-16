@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertActivitySchema } from "@shared/schema";
-import { GhinApiClient } from "./ghin-api";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user (hardcoded to user ID 1 for this demo)
@@ -18,23 +17,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user stats
+  // Get user stats based on activities
   app.get("/api/stats", async (req, res) => {
     try {
       const userId = 1; // Hardcoded for demo
-      const rounds = await storage.getRounds(userId);
-      const recentRounds = await storage.getRecentRounds(userId, 5);
+      const activities = await storage.getActivities(userId);
+      const recentActivities = await storage.getRecentActivities(userId, 5);
       
+      // Calculate activity-based stats
+      const thisWeekActivities = activities.filter(activity => {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return activity.date >= weekAgo;
+      }).length;
+      
+      const totalHours = activities.reduce((sum, activity) => sum + (activity.duration || 0), 0) / 60;
+      
+      const activityBreakdown = {
+        'on-course': activities.filter(a => a.activityType === 'on-course').length,
+        'practice-area': activities.filter(a => a.activityType === 'practice-area').length,
+        'off-course': activities.filter(a => a.activityType === 'off-course').length,
+      };
+
       const stats = {
-        roundsPlayed: rounds.length,
+        totalActivities: activities.length,
+        thisWeekActivities,
+        totalHours: Math.round(totalHours * 10) / 10,
         currentHandicap: "12.4",
-        handicapImprovement: -0.8,
-        practiceHours: 42,
-        goalTarget: "10.0",
-        goalProgress: 68,
-        recentRounds: recentRounds.map(round => ({
-          ...round,
-          date: round.date.toISOString().split('T')[0],
+        activityBreakdown,
+        recentActivities: recentActivities.map(activity => ({
+          ...activity,
+          date: activity.date.toISOString().split('T')[0],
         })),
       };
 
@@ -44,55 +57,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get performance analysis
+  // Get performance analysis based on activities
   app.get("/api/performance", async (req, res) => {
     try {
       const userId = 1; // Hardcoded for demo
-      const rounds = await storage.getRecentRounds(userId, 10);
+      const activities = await storage.getRecentActivities(userId, 10);
       
-      if (rounds.length === 0) {
+      if (activities.length === 0) {
         return res.json({
-          drivingAccuracy: { percentage: 0, rating: "No Data", color: "gray" },
-          shortGame: { percentage: 0, rating: "No Data", color: "gray" },
-          putting: { percentage: 0, rating: "No Data", color: "gray" },
-          recommendation: "Submit more rounds to get performance analysis.",
+          activityFrequency: { percentage: 0, rating: "No Data", color: "gray" },
+          practiceBalance: { percentage: 0, rating: "No Data", color: "gray" },
+          consistency: { percentage: 0, rating: "No Data", color: "gray" },
+          recommendation: "Start logging activities to get performance analysis.",
         });
       }
 
-      // Calculate averages
-      const totalFairways = rounds.reduce((sum, r) => sum + (r.fairwaysHit || 0), 0);
-      const totalGIR = rounds.reduce((sum, r) => sum + (r.greensInRegulation || 0), 0);
-      const totalPutts = rounds.reduce((sum, r) => sum + (r.totalPutts || 0), 0);
-      const totalRounds = rounds.length;
-
-      const drivingAccuracy = Math.round((totalFairways / (totalRounds * 14)) * 100);
-      const girPercentage = Math.round((totalGIR / (totalRounds * 18)) * 100);
-      const avgPuttsPerGIR = totalGIR > 0 ? (totalPutts / totalGIR).toFixed(1) : "0.0";
+      const onCourseActivities = activities.filter(a => a.activityType === 'on-course');
+      const practiceActivities = activities.filter(a => a.activityType === 'practice-area');
+      const offCourseActivities = activities.filter(a => a.activityType === 'off-course');
+      
+      // Calculate performance metrics
+      const weeklyFrequency = activities.length / 2; // assuming 2 weeks of data
+      const practiceRatio = (practiceActivities.length + offCourseActivities.length) / activities.length * 100;
+      
+      // Calculate consistency (activities spread across different days)
+      const uniqueDays = new Set(activities.map(a => a.date.toDateString())).size;
+      const consistencyScore = Math.min(100, (uniqueDays / 7) * 100); // out of 7 days
 
       const performance = {
-        drivingAccuracy: {
-          percentage: drivingAccuracy,
-          rating: drivingAccuracy >= 70 ? "Strong" : drivingAccuracy >= 50 ? "Good" : "Needs Work",
-          color: drivingAccuracy >= 70 ? "success" : drivingAccuracy >= 50 ? "warning" : "error",
-          detail: `${drivingAccuracy}% fairways hit`,
+        activityFrequency: {
+          percentage: Math.min(100, weeklyFrequency * 25), // 4 activities per week = 100%
+          rating: weeklyFrequency >= 4 ? "Excellent" : weeklyFrequency >= 2 ? "Good" : "Needs Work",
+          color: weeklyFrequency >= 4 ? "success" : weeklyFrequency >= 2 ? "warning" : "error",
+          detail: `${weeklyFrequency.toFixed(1)} activities per week`,
         },
-        shortGame: {
-          percentage: girPercentage,
-          rating: girPercentage >= 60 ? "Strong" : girPercentage >= 40 ? "Good" : "Needs Work",
-          color: girPercentage >= 60 ? "success" : girPercentage >= 40 ? "warning" : "error",
-          detail: `${girPercentage}% GIR`,
+        practiceBalance: {
+          percentage: practiceRatio,
+          rating: practiceRatio >= 60 ? "Well Balanced" : practiceRatio >= 40 ? "Good Mix" : "More Practice Needed",
+          color: practiceRatio >= 60 ? "success" : practiceRatio >= 40 ? "warning" : "error",
+          detail: `${Math.round(practiceRatio)}% practice activities`,
         },
-        putting: {
-          percentage: Math.max(0, 100 - (parseFloat(avgPuttsPerGIR) - 1.5) * 50),
-          rating: parseFloat(avgPuttsPerGIR) <= 1.7 ? "Strong" : parseFloat(avgPuttsPerGIR) <= 2.0 ? "Good" : "Focus Area",
-          color: parseFloat(avgPuttsPerGIR) <= 1.7 ? "success" : parseFloat(avgPuttsPerGIR) <= 2.0 ? "warning" : "error",
-          detail: `${avgPuttsPerGIR} putts per GIR`,
+        consistency: {
+          percentage: consistencyScore,
+          rating: consistencyScore >= 70 ? "Very Consistent" : consistencyScore >= 50 ? "Consistent" : "Sporadic",
+          color: consistencyScore >= 70 ? "success" : consistencyScore >= 50 ? "warning" : "error",
+          detail: `Active ${uniqueDays} days recently`,
         },
-        recommendation: parseFloat(avgPuttsPerGIR) > 1.9 
-          ? "Focus on putting practice - 30 minutes daily. Your short game improvement could reduce handicap by 2-3 strokes."
-          : girPercentage < 50
-          ? "Work on approach shots and iron play to improve greens in regulation."
-          : "Great consistency! Focus on course management to lower scores.",
+        recommendation: practiceRatio < 50 
+          ? "Add more practice sessions to balance your on-course play."
+          : weeklyFrequency < 2
+          ? "Try to increase activity frequency to 3-4 times per week."
+          : "Great activity pattern! Keep up the consistent routine.",
       };
 
       res.json(performance);
@@ -101,30 +116,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get rounds
-  app.get("/api/rounds", async (req, res) => {
+  // Get activities
+  app.get("/api/activities", async (req, res) => {
     try {
       const userId = 1; // Hardcoded for demo
-      const rounds = await storage.getRounds(userId);
-      res.json(rounds);
+      const activities = await storage.getActivities(userId);
+      res.json(activities);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get rounds" });
+      res.status(500).json({ message: "Failed to get activities" });
     }
   });
 
-  // Create round
-  app.post("/api/rounds", async (req, res) => {
+  // Create activity
+  app.post("/api/activities", async (req, res) => {
     try {
       const userId = 1; // Hardcoded for demo
-      const validatedData = insertRoundSchema.parse({
+      const validatedData = insertActivitySchema.parse({
         ...req.body,
         userId,
       });
 
-      const round = await storage.createRound(validatedData);
-      res.json(round);
+      const activity = await storage.createActivity(validatedData);
+      res.json(activity);
     } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create round" });
+      res.status(400).json({ message: error.message || "Failed to create activity" });
     }
   });
 
