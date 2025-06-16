@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import StatsCards from "@/components/stats-cards";
 import ProgressChart from "@/components/progress-chart";
 import PerformanceAnalysis from "@/components/performance-analysis";
-import RecentRounds from "@/components/recent-rounds";
+import RecentActivities from "@/components/recent-activities";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
@@ -42,7 +42,7 @@ export default function Dashboard() {
         <PerformanceAnalysis performance={performance} />
       </div>
 
-      <RecentRounds rounds={stats?.recentRounds || []} />
+      <RecentActivities activities={stats?.recentActivities || []} />
     </div>
   );
 }

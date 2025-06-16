@@ -5,14 +5,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
-import SubmitRound from "@/pages/submit-round";
+import RecordActivity from "@/pages/record-activity";
 import Navigation from "@/components/navigation";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/submit-round" component={SubmitRound} />
+      <Route path="/record-activity" component={RecordActivity} />
       <Route component={NotFound} />
     </Switch>
   );

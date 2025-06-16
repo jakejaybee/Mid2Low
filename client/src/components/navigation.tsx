@@ -13,7 +13,7 @@ export default function Navigation() {
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: Club },
-    { path: "/submit-round", label: "Submit Round", icon: Upload },
+    { path: "/record-activity", label: "Record Activity", icon: Upload },
   ];
 
   return (
