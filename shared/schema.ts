@@ -16,21 +16,17 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const rounds = pgTable("rounds", {
+export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   date: timestamp("date").notNull(),
-  courseName: text("course_name").notNull(),
-  totalScore: integer("total_score").notNull(),
-  courseRating: decimal("course_rating", { precision: 4, scale: 1 }),
-  slopeRating: integer("slope_rating"),
-  differential: decimal("differential", { precision: 4, scale: 1 }),
-  fairwaysHit: integer("fairways_hit"),
-  greensInRegulation: integer("greens_in_regulation"),
-  totalPutts: integer("total_putts"),
-  penalties: integer("penalties"),
-  screenshotUrl: text("screenshot_url"),
-  processed: boolean("processed").default(false),
+  activityType: text("activity_type").notNull(), // 'off-course', 'on-course', 'practice-area'
+  subType: text("sub_type"), // 'golf-strength-training', 'playing-9-holes-walking', 'chipping-putting', etc.
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  duration: integer("duration_minutes"), // calculated or manual entry
+  comment: text("comment"),
+  metadata: jsonb("metadata"), // flexible data for different activity types
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -41,16 +37,12 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
-export const insertRoundSchema = createInsertSchema(rounds).omit({
+export const insertActivitySchema = createInsertSchema(activities).omit({
   id: true,
   createdAt: true,
-  differential: true,
-  processed: true,
 });
-
-
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type InsertRound = z.infer<typeof insertRoundSchema>;
-export type Round = typeof rounds.$inferSelect;
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type Activity = typeof activities.$inferSelect;

@@ -1,4 +1,4 @@
-import { users, rounds, type User, type InsertUser, type Round, type InsertRound } from "@shared/schema";
+import { users, activities, type User, type InsertUser, type Activity, type InsertActivity } from "@shared/schema";
 
 export interface IStorage {
   // User operations
@@ -14,27 +14,27 @@ export interface IStorage {
     lastGhinSync?: Date;
   }): Promise<User>;
 
-  // Round operations
-  getRounds(userId: number): Promise<Round[]>;
-  getRound(id: number): Promise<Round | undefined>;
-  createRound(round: InsertRound): Promise<Round>;
-  updateRound(id: number, updates: Partial<Round>): Promise<Round>;
-  getRecentRounds(userId: number, limit: number): Promise<Round[]>;
+  // Activity operations
+  getActivities(userId: number): Promise<Activity[]>;
+  getActivity(id: number): Promise<Activity | undefined>;
+  createActivity(activity: InsertActivity): Promise<Activity>;
+  updateActivity(id: number, updates: Partial<Activity>): Promise<Activity>;
+  getRecentActivities(userId: number, limit: number): Promise<Activity[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private rounds: Map<number, Round>;
+  private activities: Map<number, Activity>;
   private currentUserId: number;
-  private currentRoundId: number;
+  private currentActivityId: number;
 
   constructor() {
     this.users = new Map();
-    this.rounds = new Map();
+    this.activities = new Map();
     this.currentUserId = 1;
-    this.currentRoundId = 1;
+    this.currentActivityId = 1;
 
-    // Initialize with sample user
+    // Initialize with sample user and activities
     this.initializeData();
   }
 
@@ -55,65 +55,66 @@ export class MemStorage implements IStorage {
     this.users.set(1, sampleUser);
     this.currentUserId = 2;
 
-    // Add sample rounds
-    const sampleRounds: Round[] = [
+    // Add sample activities
+    const sampleActivities: Activity[] = [
       {
         id: 1,
         userId: 1,
-        date: new Date('2024-01-15'),
-        courseName: "Westfield Country Club",
-        totalScore: 85,
-        courseRating: "71.2",
-        slopeRating: 125,
-        differential: "12.6",
-        fairwaysHit: 8,
-        greensInRegulation: 10,
-        totalPutts: 32,
-        penalties: 2,
-        screenshotUrl: null,
-        processed: false,
+        date: new Date('2024-12-15'),
+        activityType: "on-course",
+        subType: "playing-18-holes-walking",
+        startTime: new Date('2024-12-15T08:00:00'),
+        endTime: new Date('2024-12-15T12:30:00'),
+        duration: 270,
+        comment: "Beautiful morning round at Pebble Beach. Shot 82, felt great about my putting today.",
+        metadata: {
+          course: "Pebble Beach Golf Links",
+          score: 82,
+          fairwaysHit: 10,
+          greensInRegulation: 12,
+          putts: 29
+        },
         createdAt: new Date(),
       },
       {
         id: 2,
         userId: 1,
-        date: new Date('2024-01-22'),
-        courseName: "Pine Valley Golf Course",
-        totalScore: 82,
-        courseRating: "69.8",
-        slopeRating: 118,
-        differential: "11.7",
-        fairwaysHit: 9,
-        greensInRegulation: 12,
-        totalPutts: 30,
-        penalties: 1,
-        screenshotUrl: null,
-        processed: false,
+        date: new Date('2024-12-14'),
+        activityType: "practice-area",
+        subType: "driving-range",
+        startTime: new Date('2024-12-14T17:00:00'),
+        endTime: new Date('2024-12-14T18:00:00'),
+        duration: 60,
+        comment: "Worked on my driver swing. Hit about 80 balls, focusing on tempo.",
+        metadata: {
+          bucketSize: "large",
+          ballsHit: 80,
+          focusArea: "driver-swing"
+        },
         createdAt: new Date(),
       },
       {
         id: 3,
         userId: 1,
-        date: new Date('2024-01-29'),
-        courseName: "Oak Ridge Golf Club",
-        totalScore: 88,
-        courseRating: "72.5",
-        slopeRating: 132,
-        differential: "13.3",
-        fairwaysHit: 6,
-        greensInRegulation: 8,
-        totalPutts: 35,
-        penalties: 3,
-        screenshotUrl: null,
-        processed: false,
+        date: new Date('2024-12-13'),
+        activityType: "off-course",
+        subType: "golf-strength-training",
+        startTime: new Date('2024-12-13T06:30:00'),
+        endTime: new Date('2024-12-13T07:30:00'),
+        duration: 60,
+        comment: "Core and rotational strength workout. Felt really good today.",
+        metadata: {
+          workoutType: "core-and-rotation",
+          intensity: "moderate"
+        },
         createdAt: new Date(),
       }
     ];
 
-    sampleRounds.forEach(round => {
-      this.rounds.set(round.id, round);
+    sampleActivities.forEach(activity => {
+      this.activities.set(activity.id, activity);
     });
-    this.currentRoundId = 4;
+    this.currentActivityId = 4;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -121,7 +122,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    for (const user of this.users.values()) {
+    for (const user of Array.from(this.users.values())) {
       if (user.username === username) {
         return user;
       }
@@ -172,60 +173,47 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
-  async getRounds(userId: number): Promise<Round[]> {
-    const userRounds = Array.from(this.rounds.values())
-      .filter(round => round.userId === userId)
+  async getActivities(userId: number): Promise<Activity[]> {
+    const userActivities = Array.from(this.activities.values())
+      .filter(activity => activity.userId === userId)
       .sort((a, b) => b.date.getTime() - a.date.getTime());
-    return userRounds;
+    return userActivities;
   }
 
-  async getRound(id: number): Promise<Round | undefined> {
-    return this.rounds.get(id);
+  async getActivity(id: number): Promise<Activity | undefined> {
+    return this.activities.get(id);
   }
 
-  async createRound(insertRound: InsertRound): Promise<Round> {
-    const id = this.currentRoundId++;
-    const round: Round = {
+  async createActivity(insertActivity: InsertActivity): Promise<Activity> {
+    const id = this.currentActivityId++;
+    const activity: Activity = {
       id,
-      ...insertRound,
-      differential: this.calculateDifferential(insertRound),
-      processed: false,
+      ...insertActivity,
+      startTime: insertActivity.startTime || null,
+      endTime: insertActivity.endTime || null,
+      duration: insertActivity.duration || null,
+      comment: insertActivity.comment || null,
+      metadata: insertActivity.metadata || null,
+      subType: insertActivity.subType || null,
       createdAt: new Date(),
-      courseRating: insertRound.courseRating || null,
-      slopeRating: insertRound.slopeRating || null,
-      fairwaysHit: insertRound.fairwaysHit || null,
-      greensInRegulation: insertRound.greensInRegulation || null,
-      totalPutts: insertRound.totalPutts || null,
-      penalties: insertRound.penalties || null,
-      screenshotUrl: insertRound.screenshotUrl || null,
     };
-    this.rounds.set(id, round);
-    return round;
+    this.activities.set(id, activity);
+    return activity;
   }
 
-  async updateRound(id: number, updates: Partial<Round>): Promise<Round> {
-    const round = this.rounds.get(id);
-    if (!round) {
-      throw new Error("Round not found");
+  async updateActivity(id: number, updates: Partial<Activity>): Promise<Activity> {
+    const activity = this.activities.get(id);
+    if (!activity) {
+      throw new Error("Activity not found");
     }
-    const updatedRound = { ...round, ...updates };
-    this.rounds.set(id, updatedRound);
-    return updatedRound;
+    const updatedActivity = { ...activity, ...updates };
+    this.activities.set(id, updatedActivity);
+    return updatedActivity;
   }
 
-  async getRecentRounds(userId: number, limit: number): Promise<Round[]> {
-    const userRounds = await this.getRounds(userId);
-    return userRounds.slice(0, limit);
-  }
-
-  private calculateDifferential(round: InsertRound): string {
-    if (!round.courseRating || !round.slopeRating) {
-      return "0.0";
-    }
-    const courseRating = parseFloat(round.courseRating.toString());
-    const slopeRating = parseInt(round.slopeRating.toString());
-    const differential = ((round.totalScore - courseRating) * 113) / slopeRating;
-    return differential.toFixed(1);
+  async getRecentActivities(userId: number, limit: number): Promise<Activity[]> {
+    const userActivities = await this.getActivities(userId);
+    return userActivities.slice(0, limit);
   }
 }
 
