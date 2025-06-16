@@ -15,7 +15,6 @@ export default function Navigation() {
     { path: "/", label: "Dashboard", icon: Club },
     { path: "/submit-round", label: "Submit Round", icon: Upload },
     { path: "/practice-plan", label: "Practice Plan", icon: Calendar },
-    { path: "/onboarding", label: "Connect GHIN", icon: Lock, locked: true },
   ];
 
   return (
@@ -68,7 +67,6 @@ export default function Navigation() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
-              const isLocked = item.locked;
               
               return (
                 <Link key={item.path} href={item.path}>
@@ -76,12 +74,11 @@ export default function Navigation() {
                     className={`${
                       isActive
                         ? "border-b-2 border-primary text-primary"
-                        : `border-b-2 border-transparent ${isLocked ? 'text-gray-400' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                    } py-4 px-1 text-sm font-medium flex items-center transition-colors whitespace-nowrap ${isLocked ? 'cursor-not-allowed' : ''}`}
+                        : "border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } py-4 px-1 text-sm font-medium flex items-center transition-colors whitespace-nowrap`}
                   >
                     <Icon className="mr-2 h-4 w-4" />
                     {item.label}
-                    {isLocked && <span className="ml-1">🔒</span>}
                   </button>
                 </Link>
               );
@@ -97,7 +94,6 @@ export default function Navigation() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
-              const isLocked = item.locked;
               
               return (
                 <Link key={item.path} href={item.path}>
@@ -106,12 +102,11 @@ export default function Navigation() {
                     className={`${
                       isActive
                         ? "bg-primary/10 text-primary border-l-4 border-primary"
-                        : `${isLocked ? 'text-gray-400' : 'text-gray-600 hover:bg-gray-50'} border-l-4 border-transparent`
-                    } w-full text-left py-3 px-4 text-base font-medium flex items-center transition-colors ${isLocked ? 'cursor-not-allowed' : ''}`}
+                        : "text-gray-600 hover:bg-gray-50 border-l-4 border-transparent"
+                    } w-full text-left py-3 px-4 text-base font-medium flex items-center transition-colors`}
                   >
                     <Icon className="mr-3 h-5 w-5" />
                     {item.label}
-                    {isLocked && <span className="ml-auto">🔒</span>}
                   </button>
                 </Link>
               );
