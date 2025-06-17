@@ -10,13 +10,14 @@ export default function ProgressChart() {
           <CardTitle className="text-lg font-semibold text-gray-900">
             Handicap Progress
           </CardTitle>
-          <Select defaultValue="6months">
+          <Select defaultValue="last-year">
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="6months">Last 6 months</SelectItem>
-              <SelectItem value="1year">Last year</SelectItem>
+              <SelectItem value="last-year">Last year</SelectItem>
+              <SelectItem value="ytd">Year to date</SelectItem>
+              <SelectItem value="all-time">All time</SelectItem>
             </SelectContent>
           </Select>
         </div>
