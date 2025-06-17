@@ -35,7 +35,7 @@ const activityTypes = {
       { value: "golf-strength-training", label: "Golf Strength Training" },
       { value: "cardio-workout", label: "Cardio Workout" },
       { value: "flexibility-stretching", label: "Flexibility & Stretching" },
-      { value: "mental-training", label: "Mental Training" },
+      { value: "hitting-balls-at-home", label: "Hitting Balls at Home" },
     ]
   },
   "on-course": {

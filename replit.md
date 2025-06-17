@@ -91,6 +91,12 @@ The application uses PostgreSQL with the following main tables:
 
 ## Changelog
 
+- June 17, 2025: Transformed from golf round tracking to activity logging system ("Strava for golf")
+  - Changed from rounds to three activity categories: Off-course work, On-course play, Practice area
+  - Updated navigation from "Submit Round" to "Record Activity" 
+  - Added comprehensive activity tracking with time, duration, and comments
+  - Updated dashboard to show activity-based statistics and performance metrics
+  - Changed "Mental Training" to "Hitting Balls at Home" in off-course activities
 - June 15, 2025. Initial setup with full golf improvement platform
 - December 15, 2024. Removed GHIN integration and practice plan functionality to focus on core golf tracking (Strava for golf vision)
 

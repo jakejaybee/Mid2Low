@@ -32,7 +32,7 @@ const subtypeLabels = {
   "short-game-all-around": "Short Game - All Around",
   "cardio-workout": "Cardio Workout",
   "flexibility-stretching": "Flexibility & Stretching",
-  "mental-training": "Mental Training"
+  "hitting-balls-at-home": "Hitting Balls at Home"
 };
 
 export default function RecentActivities({ activities }: RecentActivitiesProps) {
