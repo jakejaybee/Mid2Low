@@ -25,7 +25,7 @@ export default function Navigation() {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <Club className="text-primary text-2xl mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8" />
-                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Mid2Low</h1>
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Parra</h1>
               </div>
             </div>
             
@@ -58,7 +58,6 @@ export default function Navigation() {
           </div>
         </div>
       </header>
-
       {/* Desktop Navigation Tabs */}
       <nav className="hidden md:block bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,7 +84,6 @@ export default function Navigation() {
           </div>
         </div>
       </nav>
-
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <nav className="md:hidden bg-white border-b border-gray-200 shadow-lg">
@@ -113,7 +111,6 @@ export default function Navigation() {
           </div>
         </nav>
       )}
-
       {/* Bottom Navigation for Mobile (iOS App Store Style) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-inset-bottom">
         <div className="flex w-full h-16">
