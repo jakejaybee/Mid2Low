@@ -98,6 +98,7 @@ The application uses PostgreSQL with the following main tables:
   - Updated dashboard to show activity-based statistics and performance metrics
   - Changed "Mental Training" to "Hitting Balls at Home" in off-course activities
   - Added third navigation tab "Settings" with placeholder page
+  - Added dropdown to handicap card with "Current", "Year to Date", and "All Time" options
 - June 15, 2025. Initial setup with full golf improvement platform
 - December 15, 2024. Removed GHIN integration and practice plan functionality to focus on core golf tracking (Strava for golf vision)
 

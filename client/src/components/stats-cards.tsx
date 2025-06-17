@@ -1,20 +1,47 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Club, TrendingDown, Calendar, Target, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Club, TrendingDown, Calendar, Target, Clock, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface StatsCardsProps {
   stats: any;
 }
 
 export default function StatsCards({ stats }: StatsCardsProps) {
+  const [handicapPeriod, setHandicapPeriod] = useState("current");
+  
   if (!stats) return null;
+
+  const getHandicapValue = () => {
+    switch (handicapPeriod) {
+      case "ytd":
+        return stats.handicapYTD || stats.currentHandicap;
+      case "alltime":
+        return stats.handicapAllTime || stats.currentHandicap;
+      default:
+        return stats.currentHandicap;
+    }
+  };
+
+  const getHandicapDetail = () => {
+    switch (handicapPeriod) {
+      case "ytd":
+        return "Year to date";
+      case "alltime":
+        return "All time";
+      default:
+        return "Official GHIN";
+    }
+  };
 
   const cards = [
     {
       title: "Current Handicap",
-      value: stats.currentHandicap,
+      value: getHandicapValue(),
       icon: Club,
-      detail: "Official GHIN",
+      detail: getHandicapDetail(),
       color: "primary",
+      hasDropdown: true,
     },
     {
       title: "Total Activities",
@@ -46,16 +73,32 @@ export default function StatsCards({ stats }: StatsCardsProps) {
         return (
           <Card key={index} className="bg-white shadow-sm border border-gray-200">
             <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-${card.color}/10 rounded-lg flex items-center justify-center`}>
-                    <Icon className={`text-${card.color} h-4 w-4 sm:h-5 sm:w-5`} />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center min-w-0 flex-1">
+                  <div className="flex-shrink-0">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-${card.color}/10 rounded-lg flex items-center justify-center`}>
+                      <Icon className={`text-${card.color} h-4 w-4 sm:h-5 sm:w-5`} />
+                    </div>
+                  </div>
+                  <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{card.title}</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{card.value}</p>
                   </div>
                 </div>
-                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{card.title}</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{card.value}</p>
-                </div>
+                {card.hasDropdown && (
+                  <div className="ml-2 flex-shrink-0">
+                    <Select value={handicapPeriod} onValueChange={setHandicapPeriod}>
+                      <SelectTrigger className="w-auto h-8 text-xs border-none shadow-none p-1">
+                        <ChevronDown className="h-3 w-3 text-gray-400" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="current">Current</SelectItem>
+                        <SelectItem value="ytd">Year to Date</SelectItem>
+                        <SelectItem value="alltime">All Time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               <div className="mt-3 sm:mt-4">
                 {card.detail && (
