@@ -14,6 +14,7 @@ export default function Navigation() {
   const navItems = [
     { path: "/", label: "Dashboard", icon: Club },
     { path: "/record-activity", label: "Record Activity", icon: Upload },
+    { path: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
